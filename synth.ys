@@ -1,0 +1,10 @@
+# synth.ys - turn one adder into a netlist of real 45 nm gates.
+# Run with:  yosys -q -l synth.log synth.ys
+read_verilog adders.v
+hierarchy -top adder_trua -chparam K 5      # which design, and its K
+synth -top adder_trua -flatten              # generic logic synthesis
+abc -liberty NangateOpenCellLibrary_typical.lib   # map onto the Nangate 45 nm cells
+opt_clean
+delete t:$scopeinfo
+tee -o synth_stat.txt stat -liberty NangateOpenCellLibrary_typical.lib   # cell count and area
+write_verilog -noattr netlist.v             # save the gate-level netlist
