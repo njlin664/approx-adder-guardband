@@ -1,19 +1,25 @@
 # timing_sweep.py - synthesize every adder and measure its critical-path delay.
-# Run with:  python3 timing_sweep.py        (about a minute)
-# Writes delay.csv. Uses OpenSTA if it is installed; ABC's own estimate otherwise.
+# Run with:  python3 timing_sweep.py          (area mode: what you ran on Day 11, writes delay.csv)
+#            python3 timing_sweep.py fast     (speed mode, Day 15: writes delay_fast.csv)
+# Uses OpenSTA if it is installed; ABC's own estimate otherwise.
 import csv, os, re, shutil, subprocess, sys
 
 LIB = "NangateOpenCellLibrary_typical.lib"
-OUT = "build"                                   # netlists and logs go here
+FAST = len(sys.argv) > 1 and sys.argv[1] == "fast"
+OUT = "build_fast" if FAST else "build"          # netlists and logs go here
+CSV = "delay_fast.csv" if FAST else "delay.csv"
 
 # (family, k, Verilog module, parameter name)
-DESIGNS  = [("exact", 0, "adder_exact", None), ("behav", 0, "adder_behav", None)]
+DESIGNS  = [("exact", 0, "adder_exact", None), ("behav", 0, "adder_behav", None),
+            ("cla", 0, "adder_cla", None)]
 DESIGNS += [("trua", k, "adder_trua", "K") for k in range(1, 13)]
 DESIGNS += [("loa",  k, "adder_loa",  "K") for k in range(1, 13)]
 DESIGNS += [("esa",  s, "adder_esa",  "S") for s in range(2, 9)]
+DESIGNS += [("etaii", k, "adder_etaii", "K") for k in range(2, 9)]    # Day 19
 
-# The exact mapping recipe ABC runs, so every design is treated the same way.
-ABC_SCRIPT = """strash
+# AREA recipe (Day 11): heavy restructuring that shrinks the logic. It turns every
+# adder, even a + b and the CLA, into a small ripple-style chain.
+AREA_SCRIPT = """strash
 &get -n
 &fraig -x
 &put
@@ -25,6 +31,15 @@ strash
 &dch -f
 &nf
 &put
+topo
+stime -p
+"""
+# SPEED recipe (Day 15): keep the adder's structure and map it for the shortest
+# delay ("-D 1" asks for 1 ps, i.e. as fast as possible), like the paper's
+# "synthesized with a constraint of zero".
+SPEED_SCRIPT = """strash
+dch
+map -D 1
 topo
 stime -p
 """
@@ -41,7 +56,8 @@ def synthesize(family, k, module, param):
     tag = f"{family}_{k}"
     netlist, log = f"{OUT}/{tag}.v", f"{OUT}/{tag}.synth.log"
     chparam = f" -chparam {param} {k}" if param else ""
-    script = f"""read_verilog adders.v
+    define = " -DFAST" if FAST else ""
+    script = f"""read_verilog{define} adders.v
 hierarchy -top {module}{chparam}
 synth -top {module} -flatten
 abc -liberty {LIB} -script {OUT}/abc_map.script
@@ -82,9 +98,10 @@ report_checks -path_delay max -digits 4
 if not os.path.exists(LIB):
     sys.exit(f"ERROR: {LIB} is not in this folder. See Day 9 of the guide.")
 os.makedirs(OUT, exist_ok=True)
-open(f"{OUT}/abc_map.script", "w").write(ABC_SCRIPT)
+open(f"{OUT}/abc_map.script", "w").write(SPEED_SCRIPT if FAST else AREA_SCRIPT)
 
 sta = find_sta()
+print("mode:", "SPEED (fast adders, delay-driven mapping)" if FAST else "AREA (ripple chains, as on Day 11)")
 print("timer:", f"OpenSTA ({sta})" if sta else "ABC estimate only (OpenSTA not found)")
 
 rows = []
@@ -97,9 +114,8 @@ for family, k, module, param in DESIGNS:
                  "opensta" if sta_ps is not None else "abc"])
     print(f"{family:>5} {k:2d}   cells {cells:3d}   area {area:7.2f}   delay {delay:7.1f} ps")
 
-with open("delay.csv", "w", newline="") as f:
+with open(CSV, "w", newline="") as f:
     w = csv.writer(f)
-    w.writerow(["design", "k", "cells", "area_um2", "abc_delay_ps", "sta_delay_ps",
-                "delay_ps", "timer"])
+    w.writerow(["design", "k", "cells", "area_um2", "abc_delay_ps", "sta_delay_ps", "delay_ps", "timer"])
     w.writerows(rows)
-print("wrote delay.csv")
+print("wrote", CSV)
