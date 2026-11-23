@@ -46,3 +46,68 @@ def esa(a, b, s):
         result = result | (total << pos)
         pos += bits
     return result
+
+
+def etaii_blocks(k):
+    """ETAII block boundaries as (low bit, high bit) pairs, lowest block first.
+    Blocks are k bits wide and line up with the TOP of the adder (bit 15);
+    if k does not divide 16, the BOTTOM block is the short one."""
+    blocks, hi = [], WIDTH
+    while hi > 0:
+        lo = max(hi - k, 0)
+        blocks.append((lo, hi))
+        hi = lo
+    return blocks[::-1]
+
+
+def etaii(a, b, k):
+    """Error-tolerant adder type II (ETAII), Day 19. Each k-bit block is added on its own.
+    Its carry-in is PREDICTED from the block just below it only, as if that block had
+    no carry coming in. So a carry can travel through at most two blocks."""
+    blocks = etaii_blocks(k)
+    result = 0
+    for j, (lo, hi) in enumerate(blocks):
+        mask = (1 << (hi - lo)) - 1
+        if j == 0:
+            cin = 0                                   # the lowest block really has no carry-in
+        else:
+            plo, phi = blocks[j - 1]                  # the block below
+            pmask = (1 << (phi - plo)) - 1
+            cin = ((((a >> plo) & pmask) + ((b >> plo) & pmask)) >> (phi - plo)) & 1
+        total = ((a >> lo) & mask) + ((b >> lo) & mask) + cin
+        if j < len(blocks) - 1:
+            total = total & mask                      # only the top block keeps its carry-out
+        result = result | (total << lo)
+    return result
+
+def etaii_blocks(k):
+    """ETAII block boundaries as (low bit, high bit) pairs, lowest block first.
+    Blocks are k bits wide and line up with the TOP of the adder (bit 15);
+    if k does not divide 16, the BOTTOM block is the short one."""
+    blocks, hi = [], WIDTH
+    while hi > 0:
+        lo = max(hi - k, 0)
+        blocks.append((lo, hi))
+        hi = lo
+    return blocks[::-1]
+
+
+def etaii(a, b, k):
+    """Error-tolerant adder type II (ETAII), Day 19. Each k-bit block is added on its own.
+    Its carry-in is PREDICTED from the block just below it only, as if that block had
+    no carry coming in. So a carry can travel through at most two blocks."""
+    blocks = etaii_blocks(k)
+    result = 0
+    for j, (lo, hi) in enumerate(blocks):
+        mask = (1 << (hi - lo)) - 1
+        if j == 0:
+            cin = 0                                   # the lowest block really has no carry-in
+        else:
+            plo, phi = blocks[j - 1]                  # the block below
+            pmask = (1 << (phi - plo)) - 1
+            cin = ((((a >> plo) & pmask) + ((b >> plo) & pmask)) >> (phi - plo)) & 1
+        total = ((a >> lo) & mask) + ((b >> lo) & mask) + cin
+        if j < len(blocks) - 1:
+            total = total & mask                      # only the top block keeps its carry-out
+        result = result | (total << lo)
+    return result

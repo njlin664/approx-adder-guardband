@@ -15,4 +15,8 @@ for s in 2 3 4 5 6 7 8; do
     ./evaluate esa $s >> results.csv
     echo "esa $s done"
 done
+for k in 2 3 4 5 6 7 8; do              # added on Day 19
+    ./evaluate etaii $k >> results.csv
+    echo "etaii $k done"
+done
 echo "ALL DONE - see results.csv"

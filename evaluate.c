@@ -5,6 +5,7 @@
  * Run:    ./evaluate trua 5      (truncated adder, k = 5)
  *         ./evaluate loa 6       (lower-part-OR adder, k = 6)
  *         ./evaluate esa 8       (equal-segmentation adder, segment size 8)
+ *         ./evaluate etaii 6     (error-tolerant adder II, block size 6; added on Day 19)
  * Prints one line:  design,k,ER_percent,MED,NMED,MRED,MSE
  */
 #include <stdio.h>
@@ -43,15 +44,40 @@ static uint32_t esa(uint32_t a, uint32_t b, int s) {
     return result;
 }
 
+/* ETAII-k (Day 19): k-bit blocks lined up with the TOP of the adder (the bottom block is the
+ * short one). Each block's carry-in is predicted from the block below it alone, as if that
+ * block had no carry-in. Same rule as etaii() in golden.py. */
+static uint32_t etaii(uint32_t a, uint32_t b, int k) {
+    int lo[16], w[16], n = 0, hi = WIDTH;
+    while (hi > 0) {                          /* blocks from the top down */
+        int l = (hi - k > 0) ? hi - k : 0;
+        lo[n] = l; w[n] = hi - l; n++; hi = l;
+    }
+    uint32_t result = 0;
+    for (int j = n - 1; j >= 0; j--) {        /* j = n-1 is the lowest block */
+        uint32_t mask = (1u << w[j]) - 1u;
+        uint32_t cin = 0;
+        if (j < n - 1) {                      /* predicted carry from the block below */
+            uint32_t pm = (1u << w[j + 1]) - 1u;
+            cin = ((((a >> lo[j + 1]) & pm) + ((b >> lo[j + 1]) & pm)) >> w[j + 1]) & 1u;
+        }
+        uint32_t total = ((a >> lo[j]) & mask) + ((b >> lo[j]) & mask) + cin;
+        if (j > 0) total &= mask;             /* only the top block (j = 0) keeps its carry-out */
+        result |= total << lo[j];
+    }
+    return result;
+}
+
 int main(int argc, char **argv) {
     if (argc != 3) {
-        fprintf(stderr, "usage: %s trua|loa|esa K\n", argv[0]);
+        fprintf(stderr, "usage: %s trua|loa|esa|etaii K\n", argv[0]);
         return 1;
     }
     int type;
     if (strcmp(argv[1], "trua") == 0)     type = 0;
     else if (strcmp(argv[1], "loa") == 0) type = 1;
     else if (strcmp(argv[1], "esa") == 0) type = 2;
+    else if (strcmp(argv[1], "etaii") == 0) type = 3;
     else { fprintf(stderr, "unknown design '%s'\n", argv[1]); return 1; }
     int k = atoi(argv[2]);
     if (k < 1 || k > 15) { fprintf(stderr, "K must be 1..15\n"); return 1; }
@@ -68,7 +94,8 @@ int main(int argc, char **argv) {
             uint32_t y = (uint32_t)a + b;                       /* exact sum  */
             uint32_t yh = (type == 0) ? trua((uint32_t)a, b, k)
                         : (type == 1) ? loa((uint32_t)a, b, k)
-                        :               esa((uint32_t)a, b, k); /* approx sum */
+                        : (type == 2) ? esa((uint32_t)a, b, k)
+                        :               etaii((uint32_t)a, b, k); /* approx sum */
             double ed = fabs((double)yh - (double)y);           /* error distance */
             if (ed > 0.0) w++;
             ed_sum += ed;
