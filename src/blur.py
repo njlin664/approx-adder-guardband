@@ -1,5 +1,5 @@
 # blur.py - Day 16: a 5x5 image blur whose additions are done by YOUR approximate adders.
-# Run with:  python3 blur.py        (self-test: checks the exact adder and the PSNR function)
+# Run with:  python3 src/blur.py        (self-test: checks the exact adder and the PSNR function)
 # Other scripts import it:  from blur import load_images, blur, psnr
 import numpy as np
 from skimage import data

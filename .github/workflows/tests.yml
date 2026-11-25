@@ -23,21 +23,21 @@ jobs:
           pip install numpy
 
       - name: Golden-model unit tests
-        run: python3 test_golden.py
+        run: python3 src/test_golden.py
 
       - name: Exhaustive C evaluator matches the validated numbers
         run: |
-          gcc -O2 -fopenmp evaluate.c -o evaluate -lm
+          gcc -O2 -fopenmp src/evaluate.c -o evaluate -lm
           ./evaluate trua 5  | tee out.txt && grep -q "^trua,5,99.9023,"   out.txt
           ./evaluate etaii 6 | tee out.txt && grep -q "^etaii,6,0.7324,"  out.txt
 
       - name: RTL regression (33 adders, 100,000 vectors)
-        run: bash run_tests.sh
+        run: bash src/run_tests.sh
 
       - name: Carry-lookahead and ETAII testbenches
         run: |
-          iverilog -g2012 -o tb_cla.vvp adders.v tb_cla.sv && vvp tb_cla.vvp | tee cla.txt
+          iverilog -g2012 -o tb_cla.vvp rtl/adders.v rtl/tb_cla.sv && vvp tb_cla.vvp | tee cla.txt
           grep -q "RESULT: PASS" cla.txt
-          python3 gen_etaii_vectors.py
-          iverilog -g2012 -o tb_etaii.vvp adders.v tb_etaii.sv && vvp tb_etaii.vvp | tee etaii.txt
+          python3 src/gen_etaii_vectors.py
+          iverilog -g2012 -o tb_etaii.vvp rtl/adders.v rtl/tb_etaii.sv && vvp tb_etaii.vvp | tee etaii.txt
           grep -q "RESULT: PASS" etaii.txt

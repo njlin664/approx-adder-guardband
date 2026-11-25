@@ -1,5 +1,5 @@
 # m2_report.py - Milestone M2: the delay-vs-error picture and the results table.
-# Run with:  python3 m2_report.py      (after timing_sweep.py and derate.py)
+# Run with:  python3 src/m2_report.py      (after timing_sweep.py and derate.py)
 import csv
 import matplotlib
 matplotlib.use("Agg")
@@ -11,10 +11,10 @@ SERIES = [("trua", "TruA-k (truncation)", "#2a78d6", "o"),
           ("etaii", "ETAII-k (error-tolerant II)", "#8b5cf6", "D")]     # Day 19
 INK, MUTED = "#1b1f27", "#5a6472"
 
-delay = {(r["design"], int(r["k"])): float(r["delay_ps"]) for r in csv.DictReader(open("delay.csv"))}
-mse = {(r["design"], int(r["k"])): float(r["MSE"]) for r in csv.DictReader(open("results.csv"))}
-picks = list(csv.DictReader(open("picks.csv")))
-timer = next(csv.DictReader(open("delay.csv")))["timer"]
+delay = {(r["design"], int(r["k"])): float(r["delay_ps"]) for r in csv.DictReader(open("data/delay.csv"))}
+mse = {(r["design"], int(r["k"])): float(r["MSE"]) for r in csv.DictReader(open("data/results.csv"))}
+picks = list(csv.DictReader(open("data/picks.csv")))
+timer = next(csv.DictReader(open("data/delay.csv")))["timer"]
 d0 = delay[("exact", 0)]
 
 fig, ax = plt.subplots(figsize=(9.5, 5.6))
@@ -58,8 +58,8 @@ for side in ("top", "right"):
 ax.tick_params(colors=MUTED)
 ax.legend(loc="lower left", frameon=False, fontsize=9)
 plt.tight_layout()
-plt.savefig("delay_vs_mse.png", dpi=150)
-print("saved delay_vs_mse.png")
+plt.savefig("figures/delay_vs_mse.png", dpi=150)
+print("saved figures/delay_vs_mse.png")
 
 # ---- m2.md: the table for the Nov 19 update and the slides ----
 out = ["# Milestone M2: is truncation the best way to remove a timing guard-band?\n",
@@ -73,9 +73,9 @@ for p in picks:
     out.append(f"| {p['scenario']} | {p['factor']} | {p['budget_ps']} | {name} | {p['fresh_ps']} | "
                f"{p['slowed_ps']} | {float(p['ER_percent']):.2f} | {float(p['MRED']):.2e} | "
                f"{float(p['MSE']):.4g} | {float(p['area_um2']):.1f} |")
-out += ["\n![delay vs MSE](delay_vs_mse.png)\n", "## Verdict\n",
+out += ["\n![delay vs MSE](../figures/delay_vs_mse.png)\n", "## Verdict\n",
         "(Write two sentences here: is truncation the best choice? Use the numbers above.)\n",
         "## Limitations\n",
         "(Uniform derating, open-source tools, one library, ripple-carry baseline, no power. See the guide.)\n"]
-open("m2.md", "w").write("\n".join(out) + "\n")
-print("wrote m2.md")
+open("reports/m2_table.md", "w").write("\n".join(out) + "\n")
+print("wrote reports/m2_table.md")

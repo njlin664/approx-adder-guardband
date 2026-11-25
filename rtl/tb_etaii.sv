@@ -1,6 +1,6 @@
 // tb_etaii.sv - Day 19: self-checking testbench for ETAII-2 to ETAII-8.
-// Run with:  python3 gen_etaii_vectors.py
-//            iverilog -g2012 -o tb_etaii.vvp adders.v tb_etaii.sv  &&  vvp tb_etaii.vvp
+// Run with:  python3 src/gen_etaii_vectors.py
+//            iverilog -g2012 -o tb_etaii.vvp rtl/adders.v rtl/tb_etaii.sv  &&  vvp tb_etaii.vvp
 `timescale 1ns/1ps
 module tb_etaii;
     localparam int NVEC = 100000;             // must match NVEC in gen_etaii_vectors.py

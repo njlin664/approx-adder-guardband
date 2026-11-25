@@ -1,11 +1,11 @@
 # plot_mse.py - draws mse_vs_k.png from results.csv and prints the TruA/LOA ratio table.
-# Run with:  python3 plot_mse.py
+# Run with:  python3 src/plot_mse.py
 import csv
 import matplotlib
 matplotlib.use("Agg")            # draw to a file, no window needed
 import matplotlib.pyplot as plt
 
-rows = list(csv.DictReader(open("results.csv")))
+rows = list(csv.DictReader(open("data/results.csv")))
 
 def series(design):
     pts = [(int(r["k"]), float(r["MSE"])) for r in rows if r["design"] == design]
@@ -29,7 +29,7 @@ ax2.set_title("ESA-s (equal segmentation)")
 ax2.grid(True, which="both", alpha=0.3)
 
 plt.tight_layout()
-plt.savefig("mse_vs_k.png", dpi=150)
+plt.savefig("figures/mse_vs_k.png", dpi=150)
 print("saved mse_vs_k.png\n")
 
 # TruA-(k-1) and LOA-k leave the same number of bits in the exact carry chain.

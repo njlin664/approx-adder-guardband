@@ -1,4 +1,4 @@
-# test_golden.py - checks golden.py. Run with:  python3 test_golden.py
+# test_golden.py - checks golden.py. Run with:  python3 src/test_golden.py
 import numpy as np
 from golden import exact, trua, loa, esa
 

@@ -1,5 +1,5 @@
 # psnr_sweep.py - Day 17: image quality (PSNR) for every adder design, over all ten images.
-# Run with:  python3 psnr_sweep.py       (about a minute; writes psnr.csv and psnr_vs_k.png)
+# Run with:  python3 src/psnr_sweep.py       (about a minute; writes psnr.csv and psnr_vs_k.png)
 import csv
 import numpy as np
 import matplotlib
@@ -27,7 +27,7 @@ for design, k in DESIGNS:
     worst = min(values)
     print(f"{design:>5}-{k:<2d}  mean PSNR {mean_psnr[(design, k)]:6.2f} dB   worst image {worst:6.2f} dB")
 
-with open("psnr.csv", "w", newline="") as f:
+with open("data/psnr.csv", "w", newline="") as f:
     w = csv.writer(f)
     w.writerow(["design", "k", "image", "psnr_db"])
     w.writerows(rows)
@@ -48,5 +48,5 @@ ax.set_title("Blur quality vs. approximation: higher is better", loc="left", fon
 ax.grid(True, alpha=0.3)
 ax.legend(frameon=False)
 plt.tight_layout()
-plt.savefig("psnr_vs_k.png", dpi=150)
+plt.savefig("figures/psnr_vs_k.png", dpi=150)
 print("saved psnr_vs_k.png")

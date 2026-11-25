@@ -1,5 +1,5 @@
 # app_vs_timing.py - Day 18: do the designs that meet timing (Day 13 picks) still give a good image?
-# Run with:  python3 app_vs_timing.py     (needs picks.csv, psnr.csv; uses picks_fast.csv if present)
+# Run with:  python3 src/app_vs_timing.py     (needs picks.csv, psnr.csv; uses picks_fast.csv if present)
 import csv, os
 import numpy as np
 import matplotlib
@@ -9,13 +9,13 @@ from blur import load_images, blur, psnr
 
 NAMES = {"trua": "TruA", "loa": "LOA", "esa": "ESA", "etaii": "ETAII"}
 mean_psnr = {}
-for r in csv.DictReader(open("psnr.csv")):
+for r in csv.DictReader(open("data/psnr.csv")):
     mean_psnr.setdefault((r["design"], int(r["k"])), []).append(min(float(r["psnr_db"]), 100.0))
 mean_psnr = {key: np.mean(v) for key, v in mean_psnr.items()}
 
-runs = [("ripple adders", "picks.csv")]
-if os.path.exists("picks_fast.csv"):
-    runs.append(("fast adders", "picks_fast.csv"))
+runs = [("ripple adders", "data/picks.csv")]
+if os.path.exists("data/picks_fast.csv"):
+    runs.append(("fast adders", "data/picks_fast.csv"))
 
 print(f"{'adders':<14}{'scenario':<20}{'pick':<9}{'MSE':>10}{'mean PSNR':>11}   30 dB?")
 for label, path in runs:
@@ -45,5 +45,5 @@ for row, (label, path) in enumerate(runs):
         ax.set_xticks([]); ax.set_yticks([])
     axes[row][0].set_ylabel(f"70 C, {label}", fontsize=9)
 plt.tight_layout(h_pad=1.5)
-plt.savefig("app_70C.png", dpi=150)
-print("saved app_70C.png")
+plt.savefig("figures/app_70C.png", dpi=150)
+print("saved figures/app_70C.png")

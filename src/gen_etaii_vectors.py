@@ -1,5 +1,5 @@
 # gen_etaii_vectors.py - Day 19: test vectors for ETAII-2 to ETAII-8 (writes etaii_vectors.mem).
-# Run with:  python3 gen_etaii_vectors.py
+# Run with:  python3 src/gen_etaii_vectors.py
 # Each line: a, b, then the expected 17-bit sum from golden.etaii for K = 2, 3, ..., 8.
 import random
 from golden import etaii

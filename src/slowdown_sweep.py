@@ -1,6 +1,6 @@
 # slowdown_sweep.py - Day 15(a): does LOA beat TruA at EVERY slowdown, not just x1.08 and x1.37?
-# Run with:  python3 slowdown_sweep.py          (ripple adders from delay.csv)
-#            python3 slowdown_sweep.py fast     (fast adders from delay_fast.csv, Day 15(c))
+# Run with:  python3 src/slowdown_sweep.py          (ripple adders from delay.csv)
+#            python3 src/slowdown_sweep.py fast     (fast adders from delay_fast.csv, Day 15(c))
 import csv, sys
 import numpy as np
 import matplotlib
@@ -8,11 +8,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 FAST = len(sys.argv) > 1 and sys.argv[1] == "fast"
-DELAY_CSV = "delay_fast.csv" if FAST else "delay.csv"
-PNG = "slowdown_sweep_fast.png" if FAST else "slowdown_sweep.png"
+DELAY_CSV = "data/delay_fast.csv" if FAST else "data/delay.csv"
+PNG = "figures/slowdown_sweep_fast.png" if FAST else "figures/slowdown_sweep.png"
 
 delay = {(r["design"], int(r["k"])): float(r["delay_ps"]) for r in csv.DictReader(open(DELAY_CSV))}
-mse = {(r["design"], int(r["k"])): float(r["MSE"]) for r in csv.DictReader(open("results.csv"))}
+mse = {(r["design"], int(r["k"])): float(r["MSE"]) for r in csv.DictReader(open("data/results.csv"))}
 d0 = delay[("exact", 0)]
 
 FAMILIES = [("trua", "TruA-k (truncation)", "#2a78d6", "o"),

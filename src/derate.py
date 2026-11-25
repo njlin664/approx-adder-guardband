@@ -1,13 +1,13 @@
 # derate.py - which adders still meet timing after aging or heat slow the chip down?
-# Run with:  python3 derate.py          (uses delay.csv,      writes picks.csv)
-#            python3 derate.py fast     (uses delay_fast.csv, writes picks_fast.csv; Day 15)
+# Run with:  python3 src/derate.py          (uses delay.csv,      writes picks.csv)
+#            python3 src/derate.py fast     (uses delay_fast.csv, writes picks_fast.csv; Day 15)
 # Model: slowed delay = fresh delay x factor. Goal: slowed approximate adder must be
 # no slower than the FRESH accurate adder, so no extra clock margin is needed.
 import csv, sys
 
 FAST = len(sys.argv) > 1 and sys.argv[1] == "fast"
-DELAY_CSV = "delay_fast.csv" if FAST else "delay.csv"
-PICKS_CSV = "picks_fast.csv" if FAST else "picks.csv"
+DELAY_CSV = "data/delay_fast.csv" if FAST else "data/delay.csv"
+PICKS_CSV = "data/picks_fast.csv" if FAST else "data/picks.csv"
 
 # Slowdown factors taken from the paper's accurate 16-bit adder:
 #   Table II: 138.6 ps fresh -> 149.5 ps after 10 years   (x1.08)
@@ -22,7 +22,7 @@ for r in csv.DictReader(open(DELAY_CSV)):
     area[key] = float(r["area_um2"])
 
 err = {}
-for r in csv.DictReader(open("results.csv")):
+for r in csv.DictReader(open("data/results.csv")):
     err[(r["design"], int(r["k"]))] = r
 
 d0 = delay[("exact", 0)]

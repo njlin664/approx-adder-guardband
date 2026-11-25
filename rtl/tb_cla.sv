@@ -1,5 +1,5 @@
 // tb_cla.sv - checks the carry-lookahead adder against the simulator's own "+".
-// Run with:  iverilog -g2012 -o tb_cla.vvp adders.v tb_cla.sv  &&  vvp tb_cla.vvp
+// Run with:  iverilog -g2012 -o tb_cla.vvp rtl/adders.v rtl/tb_cla.sv  &&  vvp tb_cla.vvp
 `timescale 1ns/1ps
 module tb_cla;
     logic [15:0] a, b;

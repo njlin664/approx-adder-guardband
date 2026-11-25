@@ -1,5 +1,5 @@
 # mred_detective.py - does the INPUT DISTRIBUTION change the error metrics?
-# Run with:  python3 mred_detective.py     (takes about a minute)
+# Run with:  python3 src/mred_detective.py     (takes about a minute)
 import numpy as np
 from golden import exact, trua
 

@@ -1,5 +1,5 @@
 # make_report.py - builds results.md: your numbers next to the paper's table rows.
-# Run with:  python3 make_report.py
+# Run with:  python3 src/make_report.py
 import csv
 
 # Paper values: (ER %, MRED in units of 1e-3, MSE) and which table they came from.
@@ -14,7 +14,7 @@ PAPER = {
 }
 
 mine = {}
-for r in csv.DictReader(open("results.csv")):
+for r in csv.DictReader(open("data/results.csv")):
     mine[(r["design"], int(r["k"]))] = r
 
 lines = []
@@ -39,6 +39,6 @@ for (d, k), r in mine.items():
 lines.append("\n## Where my numbers differ from the paper, and why\n")
 lines.append("(Write one paragraph here. See the guide for what to say.)\n")
 
-open("results.md", "w").write("\n".join(lines) + "\n")
+open("reports/results.md", "w").write("\n".join(lines) + "\n")
 print("\n".join(lines[:12]))
 print("\nwrote results.md")

@@ -1,13 +1,13 @@
 # timing_sweep.py - synthesize every adder and measure its critical-path delay.
-# Run with:  python3 timing_sweep.py          (area mode: what you ran on Day 11, writes delay.csv)
-#            python3 timing_sweep.py fast     (speed mode, Day 15: writes delay_fast.csv)
+# Run with:  python3 src/timing_sweep.py          (area mode: what you ran on Day 11, writes delay.csv)
+#            python3 src/timing_sweep.py fast     (speed mode, Day 15: writes delay_fast.csv)
 # Uses OpenSTA if it is installed; ABC's own estimate otherwise.
 import csv, os, re, shutil, subprocess, sys
 
 LIB = "NangateOpenCellLibrary_typical.lib"
 FAST = len(sys.argv) > 1 and sys.argv[1] == "fast"
 OUT = "build_fast" if FAST else "build"          # netlists and logs go here
-CSV = "delay_fast.csv" if FAST else "delay.csv"
+CSV = "data/delay_fast.csv" if FAST else "data/delay.csv"
 
 # (family, k, Verilog module, parameter name)
 DESIGNS  = [("exact", 0, "adder_exact", None), ("behav", 0, "adder_behav", None),
@@ -57,7 +57,7 @@ def synthesize(family, k, module, param):
     netlist, log = f"{OUT}/{tag}.v", f"{OUT}/{tag}.synth.log"
     chparam = f" -chparam {param} {k}" if param else ""
     define = " -DFAST" if FAST else ""
-    script = f"""read_verilog{define} adders.v
+    script = f"""read_verilog{define} rtl/adders.v
 hierarchy -top {module}{chparam}
 synth -top {module} -flatten
 abc -liberty {LIB} -script {OUT}/abc_map.script

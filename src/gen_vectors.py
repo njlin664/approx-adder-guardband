@@ -1,5 +1,5 @@
 # gen_vectors.py - writes vectors.mem: test inputs plus the answers golden.py expects.
-# Run with:  python3 gen_vectors.py
+# Run with:  python3 src/gen_vectors.py
 # Each line is one test: a, b, then the expected 17-bit sum for each of the 32 designs.
 import random
 from golden import exact, trua, loa, esa
