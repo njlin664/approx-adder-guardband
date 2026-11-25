@@ -1,0 +1,43 @@
+# .github/workflows/tests.yml - GitHub runs these checks on every push.
+# Vivado cannot run on GitHub's servers, so the RTL regression uses Icarus Verilog here.
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+          pip install numpy
+
+      - name: Golden-model unit tests
+        run: python3 test_golden.py
+
+      - name: Exhaustive C evaluator matches the validated numbers
+        run: |
+          gcc -O2 -fopenmp evaluate.c -o evaluate -lm
+          ./evaluate trua 5  | tee out.txt && grep -q "^trua,5,99.9023,"   out.txt
+          ./evaluate etaii 6 | tee out.txt && grep -q "^etaii,6,0.7324,"  out.txt
+
+      - name: RTL regression (33 adders, 100,000 vectors)
+        run: bash run_tests.sh
+
+      - name: Carry-lookahead and ETAII testbenches
+        run: |
+          iverilog -g2012 -o tb_cla.vvp adders.v tb_cla.sv && vvp tb_cla.vvp | tee cla.txt
+          grep -q "RESULT: PASS" cla.txt
+          python3 gen_etaii_vectors.py
+          iverilog -g2012 -o tb_etaii.vvp adders.v tb_etaii.sv && vvp tb_etaii.vvp | tee etaii.txt
+          grep -q "RESULT: PASS" etaii.txt
